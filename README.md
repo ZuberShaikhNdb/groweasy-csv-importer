@@ -5,9 +5,7 @@ Facebook Lead Ads, Google Ads, Excel, a competing CRM, or a hand-built
 spreadsheet — and uses Gemini to intelligently map arbitrary columns onto the
 GrowEasy CRM schema.
 
-**Live demo:** _add your deployed Vercel URL here_
-**Repo:** _add your GitHub URL here_
-**Applying for:** Software Developer Intern
+**Live demo:** groweasy-csv-importer-five-sand.vercel.app
 
 ## How it works
 
