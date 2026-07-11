@@ -7,6 +7,7 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/
 const BATCH_SIZE = 25;
 const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 800;
+const MAX_CONCURRENT_BATCHES = 5; // stay well under free-tier RPM even with several batches in flight
 
 interface BatchResult {
   imported: CrmRecord[];
@@ -107,13 +108,22 @@ export async function extractLeadsWithGemini(
   onBatchDone?: (done: number, total: number) => void,
 ) {
   const batches = chunk(rows, BATCH_SIZE);
-  const results: BatchResult[] = [];
+  const results: BatchResult[] = new Array(batches.length);
+  let completedCount = 0;
+  let nextIndex = 0;
 
-  for (let i = 0; i < batches.length; i++) {
-    const result = await processBatchWithRetry(batches[i], i, apiKey);
-    results.push(result);
-    onBatchDone?.(i + 1, batches.length);
+  async function worker() {
+    while (true) {
+      const i = nextIndex++;
+      if (i >= batches.length) return;
+      results[i] = await processBatchWithRetry(batches[i], i, apiKey);
+      completedCount++;
+      onBatchDone?.(completedCount, batches.length);
+    }
   }
+
+  const workerCount = Math.min(MAX_CONCURRENT_BATCHES, batches.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
   results.sort((a, b) => a.batchIndex - b.batchIndex);
 

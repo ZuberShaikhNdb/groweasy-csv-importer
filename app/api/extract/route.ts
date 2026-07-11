@@ -3,7 +3,7 @@ import { extractLeadsWithGemini } from "@/lib/gemini";
 import { RawRow } from "@/lib/types";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -57,4 +57,3 @@ export async function POST(req: NextRequest) {
     headers: { "Content-Type": "application/x-ndjson; charset=utf-8" },
   });
 }
-
